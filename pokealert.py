@@ -12,20 +12,19 @@ from twisted.internet import task
 from twisted.internet import reactor
 
 def make_pokevision_request(pool, request_type, lon, lat):
-  return pool.request('GET', 'https://pokevision.com/map/{}/{}/{}'.format(request_type, lon, lat))
+  response = pool.request('GET', 'https://pokevision.com/map/{}/{}/{}'.format(request_type, lon, lat))
+  return json.loads(response.data.decode('utf-8'))
 
 def send_pokealert_email(smtp, from_email, to_email, body):
   body = '\n' + body # needs newline between header and body
   smtp.sendmail(from_email, to_email, body)
 
 def loop(from_email, to_email, coordinates, smtp, request_pool, seen_uids, alert_pokemon, exclude_pokemon):
-  initiate_scan_response = make_pokevision_request(request_pool, 'scan', coordinates[0], coordinates[1])
-  decoded_response = json.loads(initiate_scan_response.data.decode('utf-8'))
+  decoded_response = make_pokevision_request(request_pool, 'scan', coordinates[0], coordinates[1])
 
   if (decoded_response['status'] == 'success'):
     job_id = decoded_response['jobId']
-    pokemon_data_response = make_pokevision_request(request_pool, 'data', coordinates[0], coordinates[1])
-    decoded_pokemon_data = json.loads(pokemon_data_response.data.decode('utf-8'))
+    decoded_pokemon_data = make_pokevision_request(request_pool, 'data', coordinates[0], coordinates[1])
 
     if (decoded_pokemon_data['status'] == 'success'):
       found_alertable_pokemon = False
