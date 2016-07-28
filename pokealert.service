@@ -1,0 +1,10 @@
+[Unit]
+Description=Pokealert
+After=multi-user.target
+
+[Service]
+ExecStart=/usr/bin/python3 /root/pokealert/pokealert.py
+
+[Install]
+WantedBy=multi-user.target
+Alias=pokealert.service
